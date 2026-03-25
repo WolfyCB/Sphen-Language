@@ -1,6 +1,5 @@
 #include "lexer.h"
 
-#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,7 +73,7 @@ void fabricToken(Lexer* lexer, const Token token){
         .line = lexer->line,
         .col = lexer->col
     });
-    //printf("%s\n", lexer->buffer.data);
+    //printf("%s %d\n", lexer->buffer.data, token.type);
     strclean(&lexer->buffer);
 }
 
@@ -287,12 +286,13 @@ void tokenize(Lexer* lexer) {
         }
 	if(isPunct(c)){
 		consume(lexer);
-	    advance(lexer);
-		if(c == '.' && peek(lexer)=='.'){
-			consume(lexer);
+	    if(c == '.' && next(lexer)=='.'){
 	    	advance(lexer);
-	    	if(peek(lexer) == '=')
+			consume(lexer);
+	    	if(next(lexer) == '='){
+	    		advance(lexer);
 				consume(lexer);
+	    	}
 		}
 		fabricToken(lexer, getPunctToken(lexer->buffer.data, lexer->buffer.size));
     	advance(lexer);

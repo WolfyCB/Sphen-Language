@@ -84,8 +84,8 @@ void LOG(const char* format, ...){
             String esc = newstr("");
             int index = 0;
             append(&str, "\e[", 2);
-            while(text[i] && text[i] != ','){
-                if(!isalpha(text[i]) && text[i] != ','){ i++; continue; }
+            while(text[i] && text[i] != ':'){
+                if(!isalpha(text[i]) && text[i]!=':'){ i++; continue; }
                 while(isalpha(text[i]))
                     strapp(&esc, text[i++]);
 

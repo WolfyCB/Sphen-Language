@@ -89,7 +89,6 @@ ASTblock parse_block(Parser* p, TokenType endToken, char* err);
 NodeId parse_type(Parser* p);
 NodeId parse_let_decl(Parser* p);
 NodeId parse_const_decl(Parser* p);
-void parse_func_params(Parser* p);
 NodeId parse_func_decl(Parser* p);
 
 // Nodeid parse_object_decl(Parser* p);
@@ -128,7 +127,7 @@ Parser parser_init(const char* filename){
 	p.count = 0;
 	newdebug(&p.errors);
 	newdebug(&p.warns);
-	
+
 	p.lexer = lexer_init(filename);
 	return p;
 }
@@ -138,7 +137,8 @@ void parser_close(Parser* p){
 }
 int parse(Parser* p){
 	tokenize(&p->lexer);
-	/*printf("\ntokens:\n");
+	/*
+	printf("\ntokens:\n");
 	Token tok;
 	unsigned int line = 0;
 	for(unsigned long int i = 0; i < p->lexer.vec.size; i++){
@@ -149,7 +149,8 @@ int parse(Parser* p){
 			for(unsigned int col = 0; col < tok.col; col++ ) printf(" ");
 		}
     	printf("%02d ", tok.type);
-    }*/
+    }
+	*/
 	parse_program(p);
 	show_debug(p);
 	return 0;
@@ -160,12 +161,15 @@ inline ASTNode parse_node(Parser* p, ASTType type){
 	return (ASTNode){.type = type, .id = p->id++};
 }
 inline int parse_isEof(Parser* p){
-	return p->pos >= p->lexer.vec.size || p->lexer.vec.data[p->pos].Class == END_OF_FILE;
+	return !(p->pos < p->lexer.vec.size) || p->lexer.vec.data[p->pos].Class == END_OF_FILE;
 }
 inline Token parse_peek(Parser* p){
+	//printf("peek: %d\n", p->lexer.vec.data[p->pos].type);
 	return (p->pos < p->lexer.vec.size) ? p->lexer.vec.data[p->pos] : (Token){.Class = END_OF_FILE};
 }
 inline Token parse_next(Parser* p){
+	//if(p->lexer.vec.data[p->pos].Class)
+	//	printf("next: %d\n", p->lexer.vec.data[p->pos].type);
 	return (p->pos < p->lexer.vec.size) ? p->lexer.vec.data[p->pos++] : (Token){.Class = END_OF_FILE};
 }
 inline int matchToken(Parser* p, TokenClass Class, TokenType type){
@@ -180,17 +184,17 @@ inline int matchClass(Parser* p, TokenClass Class){
 Token expectToken(Parser* p, TokenClass Class, TokenType type, const char* err){
 	if(matchToken(p, Class, type)) return parse_next(p);
 	parse_debug(p, ERROR, err);
-	return (Token){.Class = UNKNOWN, .type = ERR};
+	return parse_peek(p);
 }
 Token expectClass(Parser* p, TokenClass Class, const char* err){
 	if(matchClass(p, Class)) return parse_next(p);
 	parse_debug(p, ERROR, err);
-	return (Token){.Class = UNKNOWN, .type = ERR};
+	return parse_peek(p);
 }
 Token expectType(Parser* p, TokenType type, const char* err){
 	if(matchType(p, type)) return parse_next(p);
 	parse_debug(p, ERROR, err);
-	return (Token){.Class = UNKNOWN, .type = ERR};
+	return parse_peek(p);
 }
 
 int get_precedence(TokenType type) {
@@ -327,7 +331,7 @@ NodeId parse_getAST(Parser* p){
 		case   RETURN:	return parse_return_statement(p);
 		case 	BREAK:	return parse_single_statement(p, AST_BREAK_STMT);
 		case CONTINUE:	return parse_single_statement(p, AST_CONTINUE_STMT);
-		default: parse_debug(p, ERROR, "command not found"); break;
+		default: parse_debug(p, ERROR, "command not found"); parse_next(p); break;
 	}
 }
 inline int parse_program(Parser* p){
@@ -387,12 +391,13 @@ NodeId parse_single_type(Parser* p){
 	pushnode(&p->nodes, node);
 	_NODE(p, node).data_type.isId = (parse_peek(p).Class == IDENT) ? TRUE : FALSE;
 
-	if(_NODE(p, node).data_type.isId)
+	if(_NODE(p, node).data_type.isId){
 	//	_NODE(p, node).data_type.typeId = parse_peek(p).data.str;
+		parse_next(p);
 		printf("we dont have id type yet\n");
-	else _NODE(p, node).data_type.typeP = parse_peek(p).type;
+	}else
+		_NODE(p, node).data_type.typeP = expectClass(p, DATA_TYPE, "expected some $<cyan clear bold:type>$").type;
 	
-	parse_next(p);
 	return node.id;
 }
 
@@ -461,11 +466,9 @@ ASTblock parse_block(Parser* p, TokenType endToken, char* err){
 
 void parse_func_params(Parser* p){
 	int first = TRUE;
-	while(!matchToken(p, PUNCT, R_PAREN)){
-		if(!first){
-			expectToken(p, PUNCT, COMMA, "expected $<cyan clear bold:,>$ between parameters");
-			parse_next(p);
-		}
+	while(parse_peek(p).type != R_PAREN && !parse_isEof(p)){
+		//TMP_DEBUG("arging")
+		if(!first) expectToken(p, PUNCT, COMMA, "expected $<cyan clear bold:,>$ between parameters");
 		first = FALSE;
 
 		ASTNode node = parse_node(p, AST_FN_PARAM);
@@ -494,10 +497,12 @@ void parse_func_params(Parser* p){
 NodeId parse_func_decl(Parser* p){
 	ASTNode node = parse_node(p, AST_FN_DECL);
 	pushnode(&p->nodes, node);
-
+	
 	parse_next(p);
-	if(matchToken(p, PUNCT, UNDERLINE)) parse_debug(p, ERROR, "expected a letter or digit after $<cyan clear bold:_>$ at function declaration");
-	_NODE(p, node).func.name = expectClass(p, IDENT, "expected function $<cyan clear bold>name").data.str;
+	if(matchToken(p, PUNCT, UNDERLINE)){ 
+		parse_debug(p, ERROR, "expected a letter or digit after $<cyan clear bold:_>$ at function declaration");
+		parse_next(p);
+	} else _NODE(p, node).func.name = expectClass(p, IDENT, "expected function $<cyan clear bold>name").data.str;
 	expectToken(p, PUNCT, L_PAREN, "expected a $<cyan clear bold:(>$ to open args");
 	
 	_NODE(p, node).func.param.begin = p->nodes.len;
@@ -614,6 +619,7 @@ NodeId parse_default_statement(Parser* p){
 	parse_next(p);
 	expectToken(p, PUNCT, COLON, "expected a $<cyan clear bold::>$ after the $<cyan clear bold:default case>$");
 	
+	
 	_NODE(p, node).switch_st.cases.begin = p->nodes.len;
 	while(!(matchType(p, END) || matchType(p, CASE) || matchType(p, DEFAULT)))
 		_NODE(p, node).case_st.body.last = parse_getAST(p);
@@ -630,7 +636,7 @@ NodeId parse_switch_statement(Parser* p){
 	_NODE(p, node).switch_st.value = parse_expr(p, get_precedence(parse_peek(p).type));
 	expectToken(p, PUNCT, COLON, "expected a $<cyan clear bold::>$ after the $<cyan clear bold:switch>$ value");
 	_NODE(p, node).switch_st.cases.begin = p->nodes.len;
-	while(!matchToken(p, CONTROL, END)){
+	while(parse_peek(p).type != END && !parse_isEof(p)){
 		switch(parse_peek(p).type){
 			case CASE: parse_case_statement(p); break;
 			case DEFAULT: 

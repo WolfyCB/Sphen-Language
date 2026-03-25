@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <stdint.h>
 
 static inline int safe_mul_size(size_t a, size_t b, size_t *result) {
     if (a != 0 && b > SIZE_MAX / a) return 0;

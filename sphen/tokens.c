@@ -112,11 +112,9 @@ void init_keywords(){
 
     hashToken(keywords, "default", 7, CONTROL, DEFAULT);
 
-    hashToken(keywords, "nextcase", 8, CONTROL, NEXTCASE);
     hashToken(keywords, "continue", 8, CONTROL, CONTINUE);
     hashToken(keywords, "destruct", 8, KEYWORD, DESTRUCT);
-    hashToken(keywords, "template", 8, KEYWORD, TEMPLATE);
-
+    
     hashToken(keywords, "construct", 9, KEYWORD, CONSTRUCT);
 }
 

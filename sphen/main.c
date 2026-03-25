@@ -2,7 +2,7 @@
 #include "parser.h"
 
 int main() {
-	Parser p = parser_init("program/backup.th");
+	Parser p = parser_init("program/main.th");
 
 	printf("code:\n%s\n", p.lexer.code);
 	
