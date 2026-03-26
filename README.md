@@ -4,7 +4,7 @@
 
 ## Estado atual
 
-**análise léxica e sintática.**  
+**Análise léxica e sintática.**  
 O compilador já implementa:
 - Analisador léxico completo (tokens, palavras-chave, operadores, números, strings, caracteres, comentários)
 - Analisador sintático recursivo descendente
@@ -40,17 +40,20 @@ let x = 10            # tipo inferido como int
 let y: float = 3.14   # tipo explícito
 const MAX = 100       # constante
 ref r = x             # referência a x
-Funções
-sphen
+
+
+Funções:
+
 fn soma(a: int, b: int): int
     return a + b
 end
 
-fn saudacao(nome: string)
+fn saudacao(nome: str)
     print("Olá, " + nome)   # sem retorno explícito
 end
-Estruturas condicionais
-sphen
+
+Estruturas condicionais:
+
 if x > 0:
     print("positivo")
 elif x == 0:
@@ -58,8 +61,9 @@ elif x == 0:
 else:
     print("negativo")
 end
-Laços
-sphen
+
+Laços:
+
 # while
 while i < 10:
     print(i)
@@ -71,87 +75,85 @@ do:
     print(i)
     i = i - 1
 while i > 0:
-Switch
-sphen
+
+Switch:
+
 switch valor:
     case 1:
         print("um")
+        break      # sem break, cairia no próximo caso (fallthrough)
     case 2:
         print("dois")
+        break
     default:
         print("outro")
 end
-Tuplas
-sphen
+
+Nota: Sphen possui fallthrough em switch. Use break para sair do caso; omissão causa execução sequencial.
+
+Tuplas:
+
 let ponto = (10, 20)               # criação
 fn divide_resto(a: int, b: int): (int, int)
     return (a / b, a % b)
 end
 
 let (q, r) = divide_resto(10, 3)   # desestruturação
-Comentários
-sphen
+
+Comentários:
+
 # comentário de linha
 #[ comentário
    de múltiplas
    linhas ]#
-Operadores
-Categoria	Operadores
-Aritméticos	+ - * / %
-Atribuição	= += -= *= /= %=
-Comparação	== != < > <= >=
+
+
+
+
+
+Operadores:
+
+Categoria	         Operadores
+Aritméticos	          + - * / %
+Atribuição	          = += -= *= /= %=
+Comparação	          == != < > <= >=
+
 Lógicos	and or not
-Intervalo	.. (exclusivo), ..= (inclusivo)
-Referência	ref
+Intervalo	   .. (exclusivo), ..= (inclusivo)
+Referência	   ref
+
 Tipos primitivos
-Tipo	Descrição
-int	Inteiro com sinal (64 bits)
-uint	Inteiro sem sinal (64 bits)
-float	Ponto flutuante (64 bits)
-double	Sinônimo de float
-char	Caractere (8 bits)
-uchar	Caractere sem sinal
-bool	Booleano (true/false)
-string	Sequência de caracteres (imutável)
-short / ushort	Inteiros de 16 bits
-long / ulong	Inteiros de 64 bits (sinônimos)
-size / usize	Tamanhos (mesmo que uint/int)
-Módulos (planejado)
-sphen
-# math.sp
-export fn sqrt(x: float): float ...
+Tipo	         Descrição
+int	             Inteiro com sinal (64 bits)
+uint	         Inteiro sem sinal (64 bits)
+float	         Ponto flutuante (64 bits)
+double	         Sinônimo de float
+char	         Caractere (8 bits)
+uchar	         Caractere sem sinal
+bool	         Booleano (true/false)
+str	             Sequência de caracteres (imutável)
+short / ushort	 Inteiros de 16 bits
+long / ulong	 Inteiros de 64 bits (sinônimos)
+size / usize	 Tamanhos (mesmo que uint/int)
 
-# main.sp
-import "math.sp" as math
-let raiz = math.sqrt(2.0)
 Compilação
-Requisitos
+Requisitos:
 CMake 3.25+
-
 Compilador C com suporte a C17 (GCC, Clang, MSVC)
 
-Passos
+
+
+Passos:
 git clone https://github.com/Punker-Corporation/Sphen-Language.git
 cd Sphen-Language
 mkdir build && cd build
 cmake ..
 make
-O executável Sphen será criado em build/.
 
-Uso
-./Sphen caminho/para/arquivo.sp
-Atualmente, o compilador apenas exibe erros léxicos/sintáticos ou, em modo de depuração, a lista de tokens e a AST gerada.
 
-Estrutura do projeto
-text
-.
-├── CMakeLists.txt
-├── README.md
-└── src/
-    ├── main.c                # Ponto de entrada
-    ├── lexer.c / lexer.h     # Analisador léxico
-    ├── parser.c / parser.h   # Analisador sintático
-    ├── ast.c / ast.h         # Árvore Sintática Abstrata
-    ├── tokens.c / tokens.h   # Tabelas de tokens e hash
-    ├── str.c / str.h         # Strings dinâmicas
-    ├── debug.c / debug.h     # Log colorido e reporte de erros
+Uso: ./Sphen caminho/para/arquivo.sp
+
+Nota:Atualmente, o compilador apenas exibe erros léxicos/sintáticos ou, em modo de depuração, a lista de tokens e a AST gerada.
+
+
+
