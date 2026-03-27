@@ -1,6 +1,6 @@
 # Linguagem Sphen
 
-> Uma linguagem moderna, fortemente tipada, com orientação a objetos explícita e suporte a módulos – evolução do Lua mantendo a simplicidade.
+> Uma linguagem moderna, fortemente tipada, com orientação a objetos explícita e suporte a módulos – evolução do [Lua](https://www.lua.org/) mantendo a simplicidade.
 
 ## Estado atual
 
